@@ -1,0 +1,284 @@
+@import "tailwindcss";
+
+/*
+  Brand tokens, in two layers. The palette lands in the -value names first:
+  light on :root, dark applied both by prefers-color-scheme and by the
+  [data-theme] attribute the toggle writes, so a manual choice always wins over
+  the system setting. These jump. The tokens the site reads are derived from
+  them below, and those are what the theme change moves.
+*/
+:root {
+  --bg-value: #fbfaf9;
+  --surface-value: #ffffff;
+  --surface-sunken-value: #f4f2f0;
+
+  --text-value: #131110;
+  --text-muted-value: #5f5951;
+  --border-value: #e5e1dc;
+  --border-strong-value: #d3cec8;
+
+  --brand-value: #d85a30;
+  --brand-ink-value: #993c1d;
+  --brand-solid-value: #993c1d;
+  --brand-on-solid-value: #ffffff;
+  --brand-wash-value: #fdf1ec;
+
+  --series-agent-value: #d85a30;
+  --series-human-value: #5f5951;
+
+  /* Layout geometry. --rail is where the dashed rails sit, measured from the
+     shell edge; --rail-content is where content starts, clear of them. */
+  --rail: 6.5rem;
+  --rail-content: 7.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-value: #0f0e0d;
+    --surface-value: #171513;
+    --surface-sunken-value: #100f0e;
+
+    --text-value: #f2efec;
+    --text-muted-value: #948d86;
+    --border-value: #2a2724;
+    --border-strong-value: #3b3733;
+
+    --brand-value: #e9714a;
+    --brand-ink-value: #e9714a;
+    --brand-solid-value: #993c1d;
+    --brand-on-solid-value: #ffffff;
+    --brand-wash-value: #21160f;
+
+    --series-agent-value: #e9714a;
+    --series-human-value: #948d86;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg-value: #0f0e0d;
+  --surface-value: #171513;
+  --surface-sunken-value: #100f0e;
+
+  --text-value: #f2efec;
+  --text-muted-value: #948d86;
+  --border-value: #2a2724;
+  --border-strong-value: #3b3733;
+
+  --brand-value: #e9714a;
+  --brand-ink-value: #e9714a;
+  --brand-solid-value: #993c1d;
+  --brand-on-solid-value: #ffffff;
+  --brand-wash-value: #21160f;
+
+  --series-agent-value: #e9714a;
+  --series-human-value: #948d86;
+}
+
+/*
+  The tokens everything reads. Registering them as colors is what lets the theme
+  change interpolate a token itself rather than each property that happens to
+  read one. A property fade cannot be inherited: give an ancestor a moving color
+  and every descendant with a fade of its own restarts against a target that
+  keeps moving, so it trails the sweep and then snaps when the fade is taken
+  away. A moving token has no such problem, because the elements reading it are
+  simply repainted.
+*/
+@property --bg { syntax: "<color>"; inherits: true; initial-value: #fbfaf9; }
+@property --surface { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --surface-sunken { syntax: "<color>"; inherits: true; initial-value: #f4f2f0; }
+@property --text { syntax: "<color>"; inherits: true; initial-value: #131110; }
+@property --text-muted { syntax: "<color>"; inherits: true; initial-value: #5f5951; }
+@property --border { syntax: "<color>"; inherits: true; initial-value: #e5e1dc; }
+@property --border-strong { syntax: "<color>"; inherits: true; initial-value: #d3cec8; }
+@property --brand { syntax: "<color>"; inherits: true; initial-value: #d85a30; }
+@property --brand-ink { syntax: "<color>"; inherits: true; initial-value: #993c1d; }
+@property --brand-solid { syntax: "<color>"; inherits: true; initial-value: #993c1d; }
+@property --brand-on-solid { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --brand-wash { syntax: "<color>"; inherits: true; initial-value: #fdf1ec; }
+@property --series-agent { syntax: "<color>"; inherits: true; initial-value: #d85a30; }
+@property --series-human { syntax: "<color>"; inherits: true; initial-value: #5f5951; }
+
+/*
+  Declared on the root and on each section, and nowhere in between. A token is
+  only ever derived from a -value, which jumps, so nothing is ever easing toward
+  a target that is itself still moving. Sections have to stay siblings for that
+  to hold: nest one inside another and the inner one starts chasing the outer.
+*/
+:root,
+[data-theme-box] {
+  --bg: var(--bg-value);
+  --surface: var(--surface-value);
+  --surface-sunken: var(--surface-sunken-value);
+  --text: var(--text-value);
+  --text-muted: var(--text-muted-value);
+  --border: var(--border-value);
+  --border-strong: var(--border-strong-value);
+  --brand: var(--brand-value);
+  --brand-ink: var(--brand-ink-value);
+  --brand-solid: var(--brand-solid-value);
+  --brand-on-solid: var(--brand-on-solid-value);
+  --brand-wash: var(--brand-wash-value);
+  --series-agent: var(--series-agent-value);
+  --series-human: var(--series-human-value);
+}
+
+/*
+  Color inherits, so a section declares it and its whole subtree reads the
+  section's token. Zero specificity, so a utility class on a section still wins.
+*/
+:where([data-theme-box]) {
+  color: var(--text);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunken: var(--surface-sunken);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-solid: var(--brand-solid);
+  --color-brand-on-solid: var(--brand-on-solid);
+  --color-brand-wash: var(--brand-wash);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+
+  --text-display: clamp(2.25rem, 1.15rem + 4.6vw, 3.5rem);
+  --text-display--line-height: 1.06;
+  --text-display--letter-spacing: -0.022em;
+  --text-title: clamp(1.5rem, 1.15rem + 1.5vw, 2rem);
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.018em;
+  --text-lede: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --text-lede--line-height: 1.6;
+}
+
+html {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--brand);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/*
+  The only motion on the site. Paths carry pathLength="1" so the dash length is
+  normalized and the draw-in needs no measurement pass in JavaScript.
+*/
+@keyframes marrow-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes marrow-appear {
+  to {
+    opacity: 1;
+  }
+}
+
+.marrow-curve {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: marrow-draw 900ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.marrow-curve--delayed {
+  animation-delay: 140ms;
+}
+
+.marrow-marker {
+  opacity: 0;
+  animation: marrow-appear 320ms ease-out 940ms forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marrow-curve {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+
+  .marrow-marker {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+/* Large display figures drawn as an outline, the way a spec sheet calls one out. */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--text-muted);
+  opacity: 0.55;
+}
+
+@media (min-width: 640px) {
+  .text-outline {
+    -webkit-text-stroke-width: 2px;
+  }
+}
+
+/*
+  Theme change. The tokens themselves interpolate: the root carries the ground,
+  and each section carries its own delay, set from how far it sits from the
+  toggle, so the change starts at the top right and travels to the bottom left.
+  Because only the tokens move, every part of a section — its text, its rules,
+  its fills, the stroke on its outlined figures — is repainted from the same
+  moving value on the same frame, with nothing left over to catch up afterwards.
+  Built by lib/theme-transition.ts.
+*/
+:root[data-theme-shift] [data-theme-box] {
+  transition-property: --bg, --surface, --surface-sunken, --text, --text-muted,
+    --border, --border-strong, --brand, --brand-ink, --brand-solid,
+    --brand-on-solid, --brand-wash, --series-agent, --series-human;
+  transition-duration: var(--theme-shift);
+  transition-delay: var(--theme-delay, 0ms);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+  The root holds the ground, which shows past the sections at the shell margins
+  and under an overscroll, so it crossfades across the whole change instead of
+  landing with any one section.
+*/
+:root[data-theme-shift] {
+  transition-property: --bg, --surface, --surface-sunken, --text, --text-muted,
+    --border, --border-strong, --brand, --brand-ink, --brand-solid,
+    --brand-on-solid, --brand-wash, --series-agent, --series-human;
+  transition-duration: var(--theme-ground);
+  transition-delay: 0ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
